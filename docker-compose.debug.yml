@@ -1,0 +1,62 @@
+version: '3.4'
+
+services:
+  myapp:
+    image: myapp:1.0.0
+    container_name: myapp
+    build:
+      context: myapp
+      dockerfile: ./Dockerfile
+    environment:
+      NODE_ENV: production
+    ports:
+      - 3000:3000
+    networks:
+      - frontend
+  myapi:
+    image: myapi:1.0.0
+    container_name: myapi
+    build:
+      context: myapp
+      dockerfile: ./Dockerfile
+    environment:
+      NODE_ENV: production
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_RANDOM_ROOT_PASSWORD: ${MYSQL_RANDOM_ROOT_PASSWORD}
+    depends_on:
+      task-db:
+        condition: service_healthy
+    ports:
+      - 8000:8000
+    networks:
+      - frontend
+      - backend
+  task-db:
+    image: mysql:5.7
+    container_name: task-db
+    ports:
+      - 13306:3306
+    healthcheck:
+      test: ["CMD", "sleep" ,"5"]
+      interval: 2s
+      timeout: 10s
+      retries: 4
+    environment: 
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_RANDOM_ROOT_PASSWORD: ${MYSQL_RANDOM_ROOT_PASSWORD}
+    networks: 
+          - backend
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 30 myapp myapi task-db
+networks:
+  frontend:
+  backend:
+
