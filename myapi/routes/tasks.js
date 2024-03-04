@@ -2,6 +2,7 @@ var express = require('express');
 const { post } = require('./users');
 var router = express.Router();
 const Task = require('../models/Task');
+const { NONE } = require('sequelize');
 var router = express.Router();
 
 
@@ -16,17 +17,29 @@ router.get('/', function (req, res, next) {
 })
 
 router.put('/', function (req, res, next) {
-    console.log("=====================================================================")
-    console.log(req.body)
-    console.log("=====================================================================")
-    try {
+    if (req.body.id == undefined) {
         Task.create(req.body);
-    } catch (error) {
-        console.log(error)
+        res.sendStatus(201);
+    }else {
+        Task.update(
+            req.body,
+            { where: { id: req.body.id } }
+          )
+            .success(result =>
+                res.sendStatus(200)
+            )
+            .error(err =>
+                res.sendStatus(400)
+            )
     }
-
-    res.sendStatus(201)
 })
 
+router.delete('/:id', function(req, res, next){
+    Task.destroy({
+        where: {
+            id: req.params.id
+        }
+    })
+})
 
 module.exports = router;

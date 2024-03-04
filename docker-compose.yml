@@ -47,7 +47,6 @@ services:
       MYSQL_RANDOM_ROOT_PASSWORD: ${MYSQL_RANDOM_ROOT_PASSWORD}
     networks: 
           - backend
-
 networks:
   frontend:
   backend:
