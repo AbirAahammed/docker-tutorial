@@ -6,12 +6,25 @@ var router = express.Router();
 
 
 router.get('/', function (req, res, next) {
-    Task.findAll().then(data => console.log(data))
-    res.json({ status: 'running' })
+    Task.findAll({
+        attributes: [
+            "id",
+            "description",
+        ], 
+        raw : true}).then(data => res.json(data)
+    )
 })
 
 router.put('/', function (req, res, next) {
-    Task.create(req.body);
+    console.log("=====================================================================")
+    console.log(req.body)
+    console.log("=====================================================================")
+    try {
+        Task.create(req.body);
+    } catch (error) {
+        console.log(error)
+    }
+
     res.sendStatus(201)
 })
 

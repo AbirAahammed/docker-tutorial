@@ -1,4 +1,5 @@
 import './App.css';
+import Task from './component/Task';
 
 function App() {
   fetch("http://localhost:8000/users", {
@@ -14,7 +15,8 @@ function App() {
   
   return (
     <div className="App">
-      <h1>My App</h1>
+      <h1>Task List</h1>
+      <Task/>
     </div>
   );
 }
