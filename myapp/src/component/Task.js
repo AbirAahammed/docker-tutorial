@@ -1,20 +1,14 @@
-import Box from '@mui/material/Box';
-import { DataGrid } from '@mui/x-data-grid';
-import { useEffect, useState } from 'react';
-
-
 import AddIcon from '@mui/icons-material/Add';
-
-import DeleteIcon from '@mui/icons-material/Delete';
-
-
 import CancelIcon from '@mui/icons-material/Close';
+import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
-
 import { Button } from '@mui/material';
+import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
+import Snackbar from '@mui/material/Snackbar';
 import {
-    GridActionsCellItem,
+    DataGrid, GridActionsCellItem,
     GridRowEditStopReasons,
     GridRowModes,
     GridToolbarContainer
@@ -22,8 +16,7 @@ import {
 import {
     randomId
 } from '@mui/x-data-grid-generator';
-
-
+import { useEffect, useState } from 'react';
 
 function EditToolbar(props) {
     const { setRows, setRowModesModel } = props;
@@ -46,9 +39,39 @@ function EditToolbar(props) {
     );
 }
 
+const Snack = ({ severity, message, open, onClose }) => {
+    return (
+        <Snackbar open={open} autoHideDuration={2000} onClose={onClose}>
+            <Alert
+                onClose={onClose}
+                severity={severity}
+                variant="filled"
+                sx={{ width: '100%' }}
+            >
+                {message}
+            </Alert>
+        </Snackbar>
+    );
+}
 function Task() {
     const [rows, setRows] = useState([]);
     const [rowModesModel, setRowModesModel] = useState({});
+
+
+    // snackbar
+    const [open, setOpen] = useState(false);
+
+    const [message, setMessage] = useState("");
+    const [severity, setSeverity] = useState("");
+    const handleClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        setOpen(false);
+    };
+
+
     useEffect(() => {
         fetch("http://localhost:8000/tasks", {
             method: "GET",
@@ -77,7 +100,14 @@ function Task() {
         fetch(`http://localhost:8000/tasks/${id}`, {
             method: "DELETE",
 
-        }).then(data => data.json()).then(data => setRows(data))
+        })
+        .then(res => res.status)
+        .then(status => {
+                console.log(status);
+                setMessage(`Data deleted ${status}`)
+                setSeverity("warning")
+                setOpen(true);
+            })
         setRows(rows.filter((row) => row.id !== id));
     };
 
@@ -103,8 +133,13 @@ function Task() {
             },
             body: JSON.stringify(rowData)
         })
-            .then(res => res.json())
-            .then(json => console.log(json))
+            .then(res => res.status)
+            .then(status => {
+                console.log(status);
+                setMessage(`Data added ${status}`)
+                setSeverity("success")
+                setOpen(true);
+            })
             .catch(err => console.error('error:' + err));
     }
 
@@ -127,7 +162,7 @@ function Task() {
     };
 
     const columns = [
-        { field: 'id', headerName: 'ID',  flex: 1},
+        { field: 'id', headerName: 'ID', flex: 1 },
         {
             field: 'description',
             headerName: 'Description',
@@ -201,22 +236,23 @@ function Task() {
             }}
         >
             <DataGrid
-                
-            rows={rows}
-            columns={columns}
-            editMode="row"
-            processRowUpdate={processRowUpdate}
-            experimentalFeatures={{ newEditingApi: true }}
-            rowModesModel={rowModesModel}
-            onRowModesModelChange={handleRowModesModelChange}
-            onRowEditStop={handleRowEditStop}
-            slots={{
-                toolbar: EditToolbar,
-            }}
-            slotProps={{
-                toolbar: { setRows, setRowModesModel },
-            }}
+
+                rows={rows}
+                columns={columns}
+                editMode="row"
+                processRowUpdate={processRowUpdate}
+                experimentalFeatures={{ newEditingApi: true }}
+                rowModesModel={rowModesModel}
+                onRowModesModelChange={handleRowModesModelChange}
+                onRowEditStop={handleRowEditStop}
+                slots={{
+                    toolbar: EditToolbar,
+                }}
+                slotProps={{
+                    toolbar: { setRows, setRowModesModel },
+                }}
             />
+            <Snack message={message} severity={severity} open={open} onClose={handleClose}></Snack>
         </Box>
 
     );

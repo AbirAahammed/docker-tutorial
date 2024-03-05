@@ -39,7 +39,12 @@ router.delete('/:id', function(req, res, next){
         where: {
             id: req.params.id
         }
-    })
+    }).success(result =>
+        res.sendStatus(200)
+    )
+    .error(err =>
+        res.sendStatus(400)
+    )
 })
 
 module.exports = router;
