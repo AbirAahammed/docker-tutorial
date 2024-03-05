@@ -6,6 +6,7 @@ import AddIcon from '@mui/icons-material/Add';
 import Alert from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
 
+import CancelIcon from '@mui/icons-material/Cancel';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
@@ -59,20 +60,20 @@ function Task() {
     const [rows, setRows] = useState([]);
     const [rowModesModel, setRowModesModel] = useState({});
 
-    // Snakbar
+
+    // snackbar
     const [open, setOpen] = useState(false);
 
-    const handleClick = () => {
-      setOpen(true);
-    };
-  
+    const [message, setMessage] = useState("");
+    const [severity, setSeverity] = useState("");
     const handleClose = (event, reason) => {
-      if (reason === 'clickaway') {
-        return;
-      }
-  
-      setOpen(false);
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        setOpen(false);
     };
+
 
     useEffect(() => {
         fetch("http://localhost:8000/tasks", {
@@ -103,8 +104,8 @@ function Task() {
             method: "DELETE",
 
         })
-        .then(res => res.status)
-        .then(status => {
+            .then(res => res.status)
+            .then(status => {
                 console.log(status);
                 setMessage(`Data deleted ${status}`)
                 setSeverity("warning")
@@ -125,6 +126,7 @@ function Task() {
         }
     };
 
+
     const apiUpdate = (rowData) => {
         console.log(rowData)
         fetch('http://localhost:8000/tasks', {
@@ -135,9 +137,11 @@ function Task() {
             },
             body: JSON.stringify(rowData)
         })
-            .then(res => res.json())
-            .then(json => {
-                console.log(json)
+            .then(res => res.status)
+            .then(status => {
+                console.log(status);
+                setMessage(`Data added ${status}`)
+                setSeverity("success")
                 setOpen(true);
             })
             .catch(err => console.error('error:' + err));
@@ -260,32 +264,9 @@ function Task() {
                 slotProps={{
                     toolbar: { setRows, setRowModesModel },
                 }}
-
-                rows={rows}
-                columns={columns}
-                editMode="row"
-                processRowUpdate={processRowUpdate}
-                experimentalFeatures={{ newEditingApi: true }}
-                rowModesModel={rowModesModel}
-                onRowModesModelChange={handleRowModesModelChange}
-                onRowEditStop={handleRowEditStop}
-                slots={{
-                    toolbar: EditToolbar,
-                }}
-                slotProps={{
-                    toolbar: { setRows, setRowModesModel },
-                }}
             />
-            <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
-                <Alert
-                    onClose={handleClose}
-                    severity="success"
-                    variant="filled"
-                    sx={{ width: '100%' }}
-                >
-                    This is a success Alert inside a Snackbar!
-                </Alert>
-            </Snackbar>
+            <Snack message={message} severity={severity} open={open} onClose={handleClose}></Snack>
+
         </Box>
 
     );
