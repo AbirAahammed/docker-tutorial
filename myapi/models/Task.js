@@ -20,6 +20,12 @@ Task.init({
         type: DataTypes.STRING(500),
         allowNull : false
     },
+    status: {
+        type: DataTypes.ENUM({
+            values: ['Not Yet Started', 'In Progress', 'Completed', 'Blocked']
+          }),
+        defaultValue: 'Not Yet Started' 
+    },
     isdeleted : {
         type : DataTypes.TINYINT,
         defaultValue : 0,

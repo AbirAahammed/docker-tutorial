@@ -1,14 +1,17 @@
+import Box from '@mui/material/Box';
+import { DataGrid } from '@mui/x-data-grid';
+import { useEffect, useState } from 'react';
+
 import AddIcon from '@mui/icons-material/Add';
-import CancelIcon from '@mui/icons-material/Close';
+import Alert from '@mui/material/Alert';
+import Snackbar from '@mui/material/Snackbar';
+
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import { Button } from '@mui/material';
-import Alert from '@mui/material/Alert';
-import Box from '@mui/material/Box';
-import Snackbar from '@mui/material/Snackbar';
 import {
-    DataGrid, GridActionsCellItem,
+    GridActionsCellItem,
     GridRowEditStopReasons,
     GridRowModes,
     GridToolbarContainer
@@ -16,7 +19,6 @@ import {
 import {
     randomId
 } from '@mui/x-data-grid-generator';
-import { useEffect, useState } from 'react';
 
 function EditToolbar(props) {
     const { setRows, setRowModesModel } = props;
@@ -57,20 +59,20 @@ function Task() {
     const [rows, setRows] = useState([]);
     const [rowModesModel, setRowModesModel] = useState({});
 
-
-    // snackbar
+    // Snakbar
     const [open, setOpen] = useState(false);
 
-    const [message, setMessage] = useState("");
-    const [severity, setSeverity] = useState("");
-    const handleClose = (event, reason) => {
-        if (reason === 'clickaway') {
-            return;
-        }
-
-        setOpen(false);
+    const handleClick = () => {
+      setOpen(true);
     };
-
+  
+    const handleClose = (event, reason) => {
+      if (reason === 'clickaway') {
+        return;
+      }
+  
+      setOpen(false);
+    };
 
     useEffect(() => {
         fetch("http://localhost:8000/tasks", {
@@ -133,11 +135,9 @@ function Task() {
             },
             body: JSON.stringify(rowData)
         })
-            .then(res => res.status)
-            .then(status => {
-                console.log(status);
-                setMessage(`Data added ${status}`)
-                setSeverity("success")
+            .then(res => res.json())
+            .then(json => {
+                console.log(json)
                 setOpen(true);
             })
             .catch(err => console.error('error:' + err));
@@ -149,7 +149,7 @@ function Task() {
             apiUpdate({ description: newRow.description })
 
         } else {
-            apiUpdate({ id: newRow.id, description: newRow.description })
+            apiUpdate(newRow)
 
         }
         const updatedRow = { ...newRow, isNew: false };
@@ -163,11 +163,20 @@ function Task() {
 
     const columns = [
         { field: 'id', headerName: 'ID', flex: 1 },
+        { field: 'id', headerName: 'ID', flex: 1 },
         {
             field: 'description',
             headerName: 'Description',
             editable: true,
-            flex: 20
+            flex: 15
+        },
+        {
+            field: 'status',
+            headerName: 'Status',
+            type: "singleSelect",
+            valueOptions: ['Not Yet Started', 'In Progress', 'Completed', 'Blocked'],
+            editable: true,
+            flex: 4
         },
         {
             field: 'actions',
@@ -251,8 +260,32 @@ function Task() {
                 slotProps={{
                     toolbar: { setRows, setRowModesModel },
                 }}
+
+                rows={rows}
+                columns={columns}
+                editMode="row"
+                processRowUpdate={processRowUpdate}
+                experimentalFeatures={{ newEditingApi: true }}
+                rowModesModel={rowModesModel}
+                onRowModesModelChange={handleRowModesModelChange}
+                onRowEditStop={handleRowEditStop}
+                slots={{
+                    toolbar: EditToolbar,
+                }}
+                slotProps={{
+                    toolbar: { setRows, setRowModesModel },
+                }}
             />
-            <Snack message={message} severity={severity} open={open} onClose={handleClose}></Snack>
+            <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+                <Alert
+                    onClose={handleClose}
+                    severity="success"
+                    variant="filled"
+                    sx={{ width: '100%' }}
+                >
+                    This is a success Alert inside a Snackbar!
+                </Alert>
+            </Snackbar>
         </Box>
 
     );

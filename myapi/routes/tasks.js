@@ -11,6 +11,7 @@ router.get('/', function (req, res, next) {
         attributes: [
             "id",
             "description",
+            "status"
         ], 
         raw : true}).then(data => res.json(data)
     )
