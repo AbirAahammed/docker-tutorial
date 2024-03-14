@@ -25,13 +25,9 @@ router.put('/', function (req, res, next) {
         Task.update(
             req.body,
             { where: { id: req.body.id } }
+          ).then(data =>          
+            res.sendStatus(201);
           )
-            .success(result =>
-                res.sendStatus(200)
-            )
-            .error(err =>
-                res.sendStatus(400)
-            )
     }
 })
 
