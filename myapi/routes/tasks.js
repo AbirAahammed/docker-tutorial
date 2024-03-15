@@ -11,6 +11,7 @@ router.get('/', function (req, res, next) {
         attributes: [
             "id",
             "description",
+            "status"
         ], 
         raw : true}).then(data => res.json(data)
     )
@@ -24,13 +25,9 @@ router.put('/', function (req, res, next) {
         Task.update(
             req.body,
             { where: { id: req.body.id } }
+          ).then(data =>          
+            res.sendStatus(201);
           )
-            .success(result =>
-                res.sendStatus(200)
-            )
-            .error(err =>
-                res.sendStatus(400)
-            )
     }
 })
 
@@ -39,7 +36,12 @@ router.delete('/:id', function(req, res, next){
         where: {
             id: req.params.id
         }
-    })
+    }).success(result =>
+        res.sendStatus(200)
+    )
+    .error(err =>
+        res.sendStatus(400)
+    )
 })
 
 module.exports = router;
